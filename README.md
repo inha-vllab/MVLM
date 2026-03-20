@@ -1,1 +1,249 @@
-# MVLM
+# MVLM: Template-Free Tracking via Vision–Language Margin Confidence and Memory-Gated Tracking
+
+**CVPR 2026** &nbsp;|&nbsp; [Paper](추가예정) &nbsp;|&nbsp; [Project Page](https://mvlm-tft.github.io/)
+
+<p align="center">
+  <img src="assets/demo_target_shift.gif" width="400">
+</p>
+
+## Highlights
+<p align="center">
+  <img src="assets/framework.png" width="400">
+</p>
+
+- **Template-free tracking**: localizes objects using only natural language — no bounding box or visual template required at initialization
+- **MVLM confidence**: fuses VL correlation margins, encoder head predictions, and temporal memory into a single reliable score
+- **Memory-gated tracking**: dynamically switches between compact ROI search (high confidence) and global re-localization (low confidence)
+
+## News
+
+<!-- - **[2026/02]** Code and models are released. -->
+- **[2026/02]** MVLM accepted to CVPR 2026.
+
+## Main Results
+
+### Tracking-by-Language (no bounding box)
+
+| Method | TNL2K PRE | TNL2K AUC | LaSOT PRE | LaSOT AUC | OTB99 PRE | OTB99 AUC | MGIT PRE | MGIT AUC |
+|--------|:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|:--------:|:--------:|
+| JointNLT (CVPR'23) | 55.0 | 54.6 | 59.3 | 56.9 | 77.6 | 59.2 | 43.8 | 59.2 |
+| UVLTrack-B (AAAI'24) | 57.2 | 55.7 | 61.0 | 57.2 | 79.1 | 60.1 | 44.6 | 56.1 |
+| MambaVLT (CVPR'25) | 58.9 | 58.4 | 57.2 | 55.8 | 79.2 | 58.9 | 50.3 | 64.6 |
+| **MVLM (Ours)** | **60.9** | **57.8** | **65.5** | **60.7** | **84.3** | **60.7** | **55.5** | **63.5** |
+
+### Tracking-by-BBox + Language
+
+| Method | TNL2K PRE | TNL2K AUC | LaSOT PRE | LaSOT AUC | OTB99 PRE | OTB99 AUC | MGIT PRE | MGIT AUC |
+|--------|:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|:--------:|:--------:|
+| SUTrack-B224 (AAAI'25) | 67.9 | 65.0 | 80.5 | 73.2 | 93.4 | 70.8 | - | - |
+| MambaVLT (CVPR'25) | 69.9 | 66.5 | 71.0 | 66.6 | 94.4 | 72.2 | 58.9 | 69.9 |
+| DUTrack-256 (CVPR'25) | 70.6 | 64.9 | 81.1 | 73.0 | 93.9 | 70.9 | - | - |
+| **MVLM (Ours)** | **71.4** | **66.3** | 79.3 | 72.0 | 92.3 | 69.7 | **66.3** | **71.7** |
+
+## Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/inha-vllab/MVLM.git
+cd MVLM
+
+# Create conda environment
+conda create -n mvlm python=3.8 -y
+conda activate mvlm
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure local dataset and output paths
+python tracking/create_default_local_file.py --workspace_dir . --data_dir <path_to_data_root> --save_dir ./output
+```
+## Model
+
+Download the pretrained backbone and place it at `pretrained/itpn/`:
+
+| Backbone | File | Download |
+|----------|------|------|
+| FastITPN-Base | `fast_itpn_base_clipl_e1600.pt` | [Download](https://github.com/sunsmarterjie/iTPN)
+
+Download MVLM checkpoints: 
+
+| Model | Config | Backbone | Download |
+|-------|--------|----------|----------|
+| MVLM | `mvlm_TF` | FastITPN-B | [Google Drive](링크 추가 예정)
+## Data Preparation
+
+Download and organize the following datasets:
+
+- [LaSOT](https://huggingface.co/datasets/l-lt/LaSOT) — with language annotations (nlp.txt)
+- [VastTrack](https://github.com/henglan/vasttrack)
+- [TNL2K](https://github.com/wangxiao5791509/TNL2K_evaluation_toolkit)
+- [OTB99-Lang](https://github.com/QUVA-Lab/lang-tracker)
+- [MGIT](http://videocube.aitestunion.com/)
+
+Expected directory layout:
+
+```
+/path/to/data/
+├── lasot/
+│   ├── airplane/
+│   │   ├── airplane-1/
+│   │   │   ├── img/
+│   │   │   ├── groundtruth.txt
+│   │   │   └── nlp.txt
+│   │   └── ...
+│   ├── ...
+│   ├── training_set.txt
+│   └── testing_set.txt
+│
+├── vasttrack/
+│   ├── train/
+│   │   ├── Aardwolf/
+│   │   │   ├── Aardwolf-10/
+│   │   │   │   ├── imgs/
+│   │   │   │   ├── Groundtruth.txt
+│   │   │   │   └── nlp.txt
+│   │   └── ...
+│
+├── tnl2k/
+│   ├── train/
+│   │   ├── Arrow_Video_ZZ04_done/
+│   │   │   ├── imgs/
+│   │   │   ├── groundtruth.txt
+│   │   │   └── language.txt  
+│   │   └── ...
+│   ├── test/
+│   │   ├── Assian_video_Z03_done/
+│   │   │   ├── imgs/
+│   │   │   ├── groundtruth.txt
+│   │   │   └── language.txt  
+│   │   └── ...
+│
+├── otb99_lang/
+│   ├── OTB_videos/
+│   │   ├── Basketball/
+│   │   │   ├── img/
+│   │   │   └── groundtruth_rect.txt
+│   │   └── ...
+│   ├── OTB_query_test/
+│   │   ├── Biker.txt
+│   │   └── ...
+│
+└── mgit/
+    ├── attribute/
+    │   ├── groundtruth/
+    │   │   ├── 001.txt
+    │   │   └── ...
+    │   └── ...
+    ├── data/
+    │   └── test/
+    │       ├── 001/
+    │       │   ├── frame_001/
+    │       │   │   ├── 000000.jpg
+    │       │   │   └── ...
+    │       └── ...
+    └── mgit_nlp/
+        ├── 001.xlsx
+        └── ...
+```
+
+## Training
+
+```bash
+# Single GPU
+python tracking/train.py \
+  --script mvlm \
+  --config mvlm_TF \
+  --save_dir ./output --mode single
+
+# Multi-GPU (4 GPUs, torch.distributed.launch)
+python tracking/train.py \
+  --script mvlm \
+  --config mvlm_TF \
+  --save_dir ./output --mode multiple --nproc_per_node 4
+
+# Multi-GPU (4 GPUs, torchrun)
+python tracking/train.py \
+  --script mvlm \
+  --config mvlm_TF \
+  --save_dir ./output --mode multiple --nproc_per_node 4 --launcher torchrun
+```
+
+Config files are located in `experiments/mvlm/`. The text encoder (CLIP) is frozen by default during training.
+
+## Evaluation
+
+Three execution modes are available via `--mode`:
+
+| Mode | Launch command | Description |
+|------|---------------|-------------|
+| `single` | `python` | Sequential on 1 GPU (default) |
+| `dist` | `torchrun` | Distributed across GPUs via `torch.distributed` |
+| `mp` | `python` | Parallel via `multiprocessing.Pool` |
+
+### Single GPU (default)
+
+```bash
+python tracking/test.py mvlm mvlm_TF \
+  --dataset_name tnl2k --weight_path ./models/MVLM_TF.pth.tar
+```
+
+### Multi-GPU with torchrun (dist)
+
+> **Note:** `--nproc_per_node` must be specified in the `torchrun` command to set the number of processes. `--num_gpus` tells the tracker how many GPUs are available for device assignment.
+
+```bash
+torchrun --nproc_per_node <nproc_per_node> tracking/test.py mvlm mvlm_TF \
+  --dataset_name tnl2k --weight_path ./models/MVLM_TF.pth.tar --num_gpus <num_gpus> --mode dist
+```
+
+### Multi-GPU with multiprocessing (mp)
+
+```bash
+python tracking/test.py mvlm mvlm_TF \
+  --dataset_name tnl2k --weight_path ./models/MVLM_TF.pth.tar --num_gpus <num_gpus> --threads <num_threads> --mode mp
+```
+
+Supported `--dataset_name` values: `tnl2k`, `lasot`, `otb99_lang`, `mgit`.
+
+## Demo
+
+```bash
+# Template-free tracking (language only)
+python tracking/demo.py \
+  --config mvlm_TF \
+  --checkpoint ./models/MVLM_TF.pth.tar \
+  --video <path_to_video> \
+  --text "the man in white shirt" \
+  --skip-selection
+
+# Stream results to web browser
+python tracking/demo.py \
+  --config mvlm_TF \
+  --checkpoint ./models/MVLM_TF.pth.tar \
+  --video <path_to_video> \
+  --text "the man in white shirt" \
+  --skip-selection --no_display --stream_port 8080
+# Then open http://localhost:8080 in your browser
+```
+
+`--skip-selection` enables fully template-free mode. Omit it to select the initial bounding box interactively. 
+
+## Citation
+
+```bibtex
+@inproceedings{park2026mvlm,
+  title={MVLM: Template-Free Tracking via Vision--Language Margin Confidence and Memory-Gated Tracking},
+  author={Dae-Hyeon Park, Mina Baek, Jeong-Hun Ha, Chan-Seop Park, Jamshidjon Ganiev, Seung-Hwan Bae},
+  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  year={2026}
+}
+```
+
+
+## License
+
+<!-- This project is released under the [MIT License](LICENSE). -->
+
+## Acknowledgements
+
+This codebase builds upon [SUTrack](https://github.com/chenxin-dlut/SUTrack), [FastITPN](https://github.com/sunsmarterjie/iTPN), and [OpenAI CLIP](https://github.com/openai/CLIP). We thank the authors for their excellent work.
