@@ -8,7 +8,7 @@
 
 ## Highlights
 <p align="center">
-  <img src="assets/framework.png" width="400">
+  <img src="assets/framework.png" width="700">
 </p>
 
 - **Template-free tracking**: localizes objects using only natural language — no bounding box or visual template required at initialization
