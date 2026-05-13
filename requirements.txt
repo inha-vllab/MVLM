@@ -1,0 +1,23 @@
+torch==1.13.0
+torchvision==0.14.0
+opencv-python==4.12.0.88
+numpy==1.24.4
+PyYAML==5.4.1
+openai-clip==1.0.1
+timm==1.0.19
+easydict==1.13
+tensorboardX==2.6.2.2
+matplotlib==3.7.5
+tqdm==4.66.3
+Pillow==10.4.0
+jpeg4py==0.1.4
+pandas>=1.5.0
+tikzplotlib>=0.10.0
+openpyxl>=3.0.0
+
+# Web UI dependencies
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+websockets>=12.0
+python-multipart>=0.0.6
+pydantic>=2.0.0
