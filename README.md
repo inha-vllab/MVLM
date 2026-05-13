@@ -5,10 +5,11 @@
 <p align="center">
   <img src="assets/demo_target_shift.gif" width="400">
 </p>
+<!-- 여기 부분에 데모 영상 추가 예정 -->
 
 ## Highlights
 <p align="center">
-  <img src="assets/framework.png" width="700">
+  <img src="assets/framework.png" width="400">
 </p>
 
 - **Template-free tracking**: localizes objects using only natural language — no bounding box or visual template required at initialization
@@ -40,6 +41,8 @@
 | DUTrack-256 (CVPR'25) | 70.6 | 64.9 | 81.1 | 73.0 | 93.9 | 70.9 | - | - |
 | **MVLM (Ours)** | **71.4** | **66.3** | 79.3 | 72.0 | 92.3 | 69.7 | **66.3** | **71.7** |
 
+Raw tracking results are available for download: [Google Drive](https://drive.google.com/drive/folders/1JXYv0rECLvdVot4XD9LPHIptT2wfpzD6)
+
 ## Installation
 
 ```bash
@@ -57,6 +60,18 @@ pip install -r requirements.txt
 # Configure local dataset and output paths
 python tracking/create_default_local_file.py --workspace_dir . --data_dir <path_to_data_root> --save_dir ./output
 ```
+
+### Demo Web UI Frontend (optional)
+
+The Demo Web UI frontend requires [Node.js](https://nodejs.org/) (v18+) to build:
+
+```bash
+cd tracking/web/frontend
+npm install
+npm run build
+cd ../../..
+```
+
 ## Model
 
 Download the pretrained backbone and place it at `pretrained/itpn/`:
@@ -65,11 +80,12 @@ Download the pretrained backbone and place it at `pretrained/itpn/`:
 |----------|------|------|
 | FastITPN-Base | `fast_itpn_base_clipl_e1600.pt` | [Download](https://github.com/sunsmarterjie/iTPN)
 
-Download MVLM checkpoints: 
+Download MVLM checkpoints:
 
 | Model | Config | Backbone | Download |
 |-------|--------|----------|----------|
-| MVLM | `mvlm_TF` | FastITPN-B | [Google Drive](링크 추가 예정)
+| MVLM | `mvlm_TF` | FastITPN-B | [Google Drive](https://drive.google.com/file/d/1E1bbSYhfpEjhaas3mu_2XAE14WKUMCUS/view?usp=sharing)
+
 ## Data Preparation
 
 Download and organize the following datasets:
@@ -96,27 +112,27 @@ Expected directory layout:
 │   └── testing_set.txt
 │
 ├── vasttrack/
-│   ├── train/
-│   │   ├── Aardwolf/
-│   │   │   ├── Aardwolf-10/
-│   │   │   │   ├── imgs/
-│   │   │   │   ├── Groundtruth.txt
-│   │   │   │   └── nlp.txt
-│   │   └── ...
+│   └── train/
+│       ├── Aardwolf/
+│       │   ├── Aardwolf-10/
+│       │   │   ├── imgs/
+│       │   │   ├── Groundtruth.txt
+│       │   │   └── nlp.txt
+│       └── ...
 │
 ├── tnl2k/
 │   ├── train/
 │   │   ├── Arrow_Video_ZZ04_done/
 │   │   │   ├── imgs/
 │   │   │   ├── groundtruth.txt
-│   │   │   └── language.txt  
+│   │   │   └── language.txt
 │   │   └── ...
-│   ├── test/
-│   │   ├── Assian_video_Z03_done/
-│   │   │   ├── imgs/
-│   │   │   ├── groundtruth.txt
-│   │   │   └── language.txt  
-│   │   └── ...
+│   └── test/
+│       ├── Assian_video_Z03_done/
+│       │   ├── imgs/
+│       │   ├── groundtruth.txt
+│       │   └── language.txt
+│       └── ...
 │
 ├── otb99_lang/
 │   ├── OTB_videos/
@@ -124,9 +140,9 @@ Expected directory layout:
 │   │   │   ├── img/
 │   │   │   └── groundtruth_rect.txt
 │   │   └── ...
-│   ├── OTB_query_test/
-│   │   ├── Biker.txt
-│   │   └── ...
+│   └── OTB_query_test/
+│       ├── Biker.txt
+│       └── ...
 │
 └── mgit/
     ├── attribute/
@@ -168,9 +184,11 @@ python tracking/train.py \
   --save_dir ./output --mode multiple --nproc_per_node 4 --launcher torchrun
 ```
 
-Config files are located in `experiments/mvlm/`. The text encoder (CLIP) is frozen by default during training.
+Config files are located in `experiments/mvlm/`. The text encoder (CLIP) is frozen by default during training. Checkpoints are saved without frozen CLIP weights to reduce file size.
 
 ## Evaluation
+
+### Step 1: Generate Tracking Results
 
 Three execution modes are available via `--mode`:
 
@@ -180,32 +198,40 @@ Three execution modes are available via `--mode`:
 | `dist` | `torchrun` | Distributed across GPUs via `torch.distributed` |
 | `mp` | `python` | Parallel via `multiprocessing.Pool` |
 
-### Single GPU (default)
-
 ```bash
+# Single GPU (default)
 python tracking/test.py mvlm mvlm_TF \
-  --dataset_name tnl2k --weight_path ./models/MVLM_TF.pth.tar
-```
+  --dataset_name tnl2k --weight_path ./models/MVLM_TF.pth.tar --exp_id test_run1
 
-### Multi-GPU with torchrun (dist)
-
-> **Note:** `--nproc_per_node` must be specified in the `torchrun` command to set the number of processes. `--num_gpus` tells the tracker how many GPUs are available for device assignment.
-
-```bash
+# Multi-GPU with torchrun (dist)
 torchrun --nproc_per_node <nproc_per_node> tracking/test.py mvlm mvlm_TF \
-  --dataset_name tnl2k --weight_path ./models/MVLM_TF.pth.tar --num_gpus <num_gpus> --mode dist
-```
+  --dataset_name tnl2k --weight_path ./models/MVLM_TF.pth.tar --num_gpus <num_gpus> --mode dist --exp_id test_run1
 
-### Multi-GPU with multiprocessing (mp)
-
-```bash
+# Multi-GPU with multiprocessing (mp)
 python tracking/test.py mvlm mvlm_TF \
-  --dataset_name tnl2k --weight_path ./models/MVLM_TF.pth.tar --num_gpus <num_gpus> --threads <num_threads> --mode mp
+  --dataset_name tnl2k --weight_path ./models/MVLM_TF.pth.tar --num_gpus <num_gpus> --threads <num_threads> --mode mp --exp_id test_run1
 ```
 
 Supported `--dataset_name` values: `tnl2k`, `lasot`, `otb99_lang`, `mgit`.
 
+### Step 2: Compute Metrics (Precision / AUC)
+
+After tracking results are generated, compute PRE, NPR, AUC:
+
+```bash
+# --exp_id must match the value used in test.py (results are stored under results_dir/{tracker_name}/{exp_id}/)
+python tracking/analysis_results.py \
+  --tracker_name mvlm \
+  --tracker_param mvlm_TF \
+  --exp_id test_run1 \
+  --dataset tnl2k
+```
+
+**MGIT submission:** To evaluate MGIT test set performance, submit raw tracking results to [VideoCube Official Platform](http://videocube.aitestunion.com/videocube)
+
 ## Demo
+
+### CLI Demo
 
 ```bash
 # Template-free tracking (language only)
@@ -224,9 +250,39 @@ python tracking/demo.py \
   --text "the man in white shirt" \
   --skip-selection --no_display --stream_port 8080
 # Then open http://localhost:8080 in your browser
+
+# Force CPU inference (no GPU required)
+python tracking/demo.py \
+  --config mvlm_TF \
+  --checkpoint ./models/MVLM_TF.pth.tar \
+  --video <path_to_video> \
+  --text "the man in white shirt" \
+  --skip-selection --device cpu
 ```
 
-`--skip-selection` enables fully template-free mode. Omit it to select the initial bounding box interactively. 
+`--skip-selection` enables fully template-free mode. Omit it to select the initial bounding box interactively.
+
+### Web UI
+
+The Demo Web UI provides a browser-based interface for interactive tracking — configure model, video, and text description through the GUI without any CLI parameters.
+
+> **Note:** The frontend must be built before first use. See [Demo Web UI Frontend](#web-ui-frontend-optional) in the Installation section.
+
+```bash
+# Start the server (opens at http://localhost:8080)
+python tracking/web/api.py
+
+# Force CPU inference
+python tracking/web/api.py --device cpu
+```
+
+**Workflow:**
+1. **Model tab** — Select config (`mvlm_TF` or `mvlm_BBOX`) and checkpoint, then click Load
+2. **Video tab** — Enter video path (or upload/URL/webcam), then click Load Video
+3. First frame preview appears — optionally drag to select initial ROI
+4. Enter target description and click **Start Tracking**
+5. **Control tab** — Pause/resume, switch target mid-tracking
+
 
 ## Citation
 
@@ -240,7 +296,7 @@ python tracking/demo.py \
 ```
 
 
-## License
+<!-- ## License -->
 
 <!-- This project is released under the [MIT License](LICENSE). -->
 
