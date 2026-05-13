@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MVLM Tracker Control</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; padding: 20px; background: #0f1117; color: #c9d1d9; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { font-size: 15px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: #6e7681; margin-bottom: 20px; }
+        h2 { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #6e7681; margin-bottom: 14px; }
+        .panel { background: #161b22; border: 1px solid #21262d; padding: 16px; border-radius: 6px; margin-bottom: 12px; }
+        .main-layout { display: flex; gap: 16px; align-items: flex-start; }
+        .video-container { flex: 1 1 auto; min-width: 0; }
+        .video-container img { width: 100%; border-radius: 4px; display: block; }
+        .side-panel { flex: 0 0 300px; display: flex; flex-direction: column; }
+        label { display: block; margin-top: 10px; font-size: 11px; color: #6e7681; text-transform: uppercase; letter-spacing: 0.06em; }
+        input[type="text"] { width: 100%; padding: 7px 10px; margin-top: 5px; background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; border-radius: 4px; font-size: 13px; outline: none; }
+        input[type="text"]:focus { border-color: #388bfd; }
+        input[type="number"] { width: 60px; padding: 7px 8px; margin-top: 5px; margin-right: 4px; background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; border-radius: 4px; font-size: 13px; outline: none; }
+        input[type="number"]:focus { border-color: #388bfd; }
+        button { padding: 7px 16px; border: 1px solid #30363d; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500; margin-top: 12px; background: #21262d; color: #c9d1d9; transition: background 0.15s, border-color 0.15s; }
+        button:hover { background: #30363d; border-color: #8b949e; }
+        button.primary { background: #1f6feb; border-color: #1f6feb; color: #fff; }
+        button.primary:hover { background: #388bfd; border-color: #388bfd; }
+        button.danger { background: #21262d; border-color: #30363d; color: #f85149; }
+        button.danger:hover { background: #2d1b1b; border-color: #f85149; }
+        .control-buttons { display: flex; gap: 8px; margin-top: 12px; }
+        .status { padding: 8px 12px; border-radius: 4px; margin-top: 10px; font-size: 12px; }
+        .status.success { background: #0d2b1b; border: 1px solid #1a4731; color: #56d364; }
+        .status.error { background: #2d1b1b; border: 1px solid #4a1e1e; color: #f85149; }
+        .current-target { color: #c9d1d9; font-weight: 500; }
+        .target-label { font-size: 11px; color: #6e7681; text-transform: uppercase; letter-spacing: 0.06em; }
+        .pause-indicator { font-size: 11px; color: #e3b341; font-weight: 600; letter-spacing: 0.06em; display: none; }
+        p { font-size: 13px; line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MVLM Tracker</h1>
+
+        <div class="main-layout">
+            <div class="video-container">
+                <img src="/stream" alt="Video Stream">
+            </div>
+
+            <div class="side-panel">
+                <div class="panel">
+                    <div class="target-label">Current Target</div>
+                    <p style="margin-top:8px;"><span id="currentTarget" class="current-target">—</span>
+                    <span id="pauseIndicator" class="pause-indicator"> &nbsp;PAUSED</span></p>
+                </div>
+
+                <div class="panel">
+                    <h2>Controls</h2>
+                    <div class="control-buttons">
+                        <button id="pauseBtn" onclick="togglePause()">Pause</button>
+                        <button class="danger" onclick="quitTracker()">Quit</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2>Switch Target</h2>
+                    <label>Description</label>
+                    <input type="text" id="newText" placeholder="e.g., the woman in red dress">
+
+                    <label>Bounding Box — x, y, w, h (optional)</label>
+                    <div style="margin-top:5px;">
+                        <input type="number" id="bboxX" placeholder="x">
+                        <input type="number" id="bboxY" placeholder="y">
+                        <input type="number" id="bboxW" placeholder="w">
+                        <input type="number" id="bboxH" placeholder="h">
+                    </div>
+
+                    <button class="primary" onclick="switchTarget()">Switch Target</button>
+                    <div id="status" class="status" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isPaused = false;
+
+        function togglePause() {
+            const action = isPaused ? 'resume' : 'pause';
+            fetch('/control', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: action })
+            })
+            .then(r => r.json())
+            .then(result => {
+                if (result.status === 'ok') {
+                    isPaused = !isPaused;
+                    document.getElementById('pauseBtn').textContent = isPaused ? 'Resume' : 'Pause';
+                    document.getElementById('pauseIndicator').style.display = isPaused ? 'inline' : 'none';
+                    showStatus(result.message, 'success');
+                }
+            })
+            .catch(err => showStatus('Network error: ' + err, 'error'));
+        }
+
+        function quitTracker() {
+            if (confirm('Are you sure you want to quit tracking?')) {
+                fetch('/control', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'quit' })
+                })
+                .then(() => {
+                    showStatus('Quit signal sent. Stopping...', 'success');
+                    setTimeout(() => {
+                        document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#0f1117;color:#6e7681;font-size:14px;font-family:system-ui,sans-serif;letter-spacing:0.06em;">TRACKER STOPPED</div>';
+                    }, 1000);
+                });
+            }
+        }
+
+        function switchTarget() {
+            const text = document.getElementById('newText').value;
+            if (!text) {
+                showStatus('Please enter a description', 'error');
+                return;
+            }
+
+            const x = document.getElementById('bboxX').value;
+            const y = document.getElementById('bboxY').value;
+            const w = document.getElementById('bboxW').value;
+            const h = document.getElementById('bboxH').value;
+
+            const data = { text: text };
+            if (x && y && w && h) {
+                data.bbox = [parseInt(x), parseInt(y), parseInt(w), parseInt(h)];
+            }
+
+            fetch('/new_target', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(r => r.json())
+            .then(result => {
+                if (result.status === 'queued') {
+                    const msg = data.bbox
+                        ? 'Target switch queued! Processing...'
+                        : 'Text updated (no bbox: tracker not re-initialized)';
+                    showStatus(msg, 'success');
+                    document.getElementById('currentTarget').textContent = text;
+                    document.getElementById('newText').value = '';
+                } else {
+                    showStatus('Error: ' + (result.error || 'Unknown'), 'error');
+                }
+            })
+            .catch(err => showStatus('Network error: ' + err, 'error'));
+        }
+
+        function showStatus(msg, type) {
+            const el = document.getElementById('status');
+            el.textContent = msg;
+            el.className = 'status ' + type;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 3000);
+        }
+
+        // Sync current target and pause state from server
+        setInterval(() => {
+            fetch('/current_target')
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('currentTarget').textContent = data.text;
+                    if (data.paused !== isPaused) {
+                        isPaused = data.paused;
+                        document.getElementById('pauseBtn').textContent = isPaused ? 'Resume' : 'Pause';
+                        document.getElementById('pauseIndicator').style.display = isPaused ? 'inline' : 'none';
+                    }
+                })
+                .catch(() => {});
+        }, 500);
+    </script>
+</body>
+</html>
