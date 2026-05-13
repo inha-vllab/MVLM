@@ -1,12 +1,6 @@
 # MVLM: Template-Free Tracking via Vision–Language Margin Confidence and Memory-Gated Tracking
 
 **CVPR 2026** &nbsp;|&nbsp; [Paper](추가예정) &nbsp;|&nbsp; [Project Page](https://mvlm-tft.github.io/)
-
-<p align="center">
-  <img src="assets/demo_target_shift.gif" width="400">
-</p>
-<!-- 여기 부분에 데모 영상 추가 예정 -->
-
 ## Highlights
 <p align="center">
   <img src="assets/framework.png" width="800">
@@ -18,7 +12,7 @@
 
 ## News
 
-<!-- - **[2026/02]** Code and models are released. -->
+- **[2026/05]** Code and models are released.
 - **[2026/02]** MVLM accepted to CVPR 2026.
 
 ## Main Results
