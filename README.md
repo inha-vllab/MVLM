@@ -218,7 +218,7 @@ python tracking/analysis_results.py \
   --tracker_name mvlm \
   --tracker_param mvlm_TF \
   --exp_id test_run1 \
-  --dataset tnl2k
+  --dataset lasot
 ```
 
 **MGIT submission:** To evaluate MGIT test set performance, submit raw tracking results to [VideoCube Official Platform](http://videocube.aitestunion.com/videocube)
