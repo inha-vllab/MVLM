@@ -37,8 +37,7 @@ def main():
     parser.add_argument('tracker_name', type=str, help='Name of tracking method.')
     parser.add_argument('tracker_param', type=str, help='Name of config file.')
     parser.add_argument('--exp_id', type=str, default=None, help='The run id.')
-    parser.add_argument('--dataset_name', type=str, default='lasot', help='Name of dataset (lasot, tnl2k, vasttrack, '
-                                                                          'otb99_lang, mgit).')
+    parser.add_argument('--dataset_name', type=str, default='lasot', help='Name of dataset (lasot, tnl2k, otb99_lang, mgit).')
     parser.add_argument('--weight_path', type=str, default=None, help='The weight path.')
     parser.add_argument('--sequence', type=str, default=None, help='Sequence number or name.')
     parser.add_argument('--debug', action='store_true', help='Debug level.')
