@@ -195,15 +195,15 @@ Three execution modes are available via `--mode`:
 ```bash
 # Single GPU (default)
 python tracking/test.py mvlm mvlm_TF \
-  --dataset_name tnl2k --weight_path ./models/MVLM_TF.pth.tar --exp_id test_run1
+  --dataset_name lasot --weight_path ./models/MVLM_TF.pth.tar --exp_id test_run1
 
 # Multi-GPU with torchrun (dist)
 torchrun --nproc_per_node <nproc_per_node> tracking/test.py mvlm mvlm_TF \
-  --dataset_name tnl2k --weight_path ./models/MVLM_TF.pth.tar --num_gpus <num_gpus> --mode dist --exp_id test_run1
+  --dataset_name lasot --weight_path ./models/MVLM_TF.pth.tar --num_gpus <num_gpus> --mode dist --exp_id test_run1
 
 # Multi-GPU with multiprocessing (mp)
 python tracking/test.py mvlm mvlm_TF \
-  --dataset_name tnl2k --weight_path ./models/MVLM_TF.pth.tar --num_gpus <num_gpus> --threads <num_threads> --mode mp --exp_id test_run1
+  --dataset_name lasot --weight_path ./models/MVLM_TF.pth.tar --num_gpus <num_gpus> --threads <num_threads> --mode mp --exp_id test_run1
 ```
 
 Supported `--dataset_name` values: `tnl2k`, `lasot`, `otb99_lang`, `mgit`.
