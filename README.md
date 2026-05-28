@@ -285,9 +285,11 @@ python tracking/web/api.py --device cpu
 ```bibtex
 @inproceedings{park2026mvlm,
   title={MVLM: Template-Free Tracking via Vision--Language Margin Confidence and Memory-Gated Tracking},
-  author={Dae-Hyeon Park, Mina Baek, Jeong-Hun Ha, Chan-Seop Park, Jamshidjon Ganiev, Seung-Hwan Bae},
+  author={Park, Dae-Hyeon and Baek, Mina and Ha, Jeong-Hun and Park, Chan-Seop and Ganiev, Jamshidjon and Bae, Seung-Hwan},
   booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
-  year={2026}
+  month={June},
+  year={2026},
+  pages={35156-35165}
 }
 ```
 
