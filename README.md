@@ -17,7 +17,7 @@
 
 ## Main Results
 
-### Tracking-by-Language (no bounding box)
+### Tracking-by-Language 
 
 | Method | TNL2K PRE | TNL2K AUC | LaSOT PRE | LaSOT AUC | OTB99 PRE | OTB99 AUC | MGIT PRE | MGIT AUC |
 |----------------|:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|:--------:|:--------:|
